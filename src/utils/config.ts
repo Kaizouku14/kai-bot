@@ -1,6 +1,5 @@
 import { Config } from "../interfaces/config"
-
-require('dotenv').config()
+import "dotenv/config"
 
 let config : Config = {
     DISCORD_TOKEN : process.env.DISCORD_TOKEN!,

@@ -12,9 +12,11 @@
   "dependencies": {
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
+    "firebase": "^10.12.2",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@types/node": "^20.14.9",
     "typescript": "^5.5.2"
   }
 }
