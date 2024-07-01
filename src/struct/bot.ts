@@ -7,17 +7,17 @@ import { Client,
   Events,
   Interaction,
   Presence,
-  ActivityType
+  ActivityType,
+  Activity
 } from "discord.js";
-import keepAlive from "../utils/keepAlive";
-import config from "../utils/config";
 import { Command } from "../interfaces/command";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { calculateDuration } from "../utils/util";
+import keepAlive from "../utils/keepAlive";
+import config from "../utils/config";
+import { writeUserData } from "../database/Service";
 
 export class Bot {
-    public commands = new Collection<string, Command>();
     public slashCommands = new Array<ApplicationCommandDataResolvable>();
     public slashCommandsMap = new Collection<string, Command>();
 
@@ -38,43 +38,45 @@ export class Bot {
       // this.onInteractionCreate();
     }
 
-  private async onPresenceUpdate(){
-      this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence: Presence): Promise<any> => {
-        if(oldPresence?.user?.bot || newPresence?.user?.bot) return;
-
-         const oldActivity = oldPresence?.activities.find(activity => activity.type === ActivityType.Playing);
-         const newActivity = newPresence?.activities.find(activity => activity.type === ActivityType.Playing);
-
-          if(newActivity){
-            console.log('new activity')
-            console.log(newPresence.user?.id)
-            console.log(newPresence.user?.username)
-
-           const activity = newPresence.activities.map(activity => ({
-              name: activity.name,
-              timestamps: activity.timestamps
-            }))
-
-            console.log(activity)
-            
+    private onPresenceUpdate() {
+      this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence: Presence) => {
+        try {
+          if (oldPresence?.user?.bot || newPresence?.user?.bot) return;
+  
+          const oldActivity = oldPresence?.activities.find(activity => activity.type === ActivityType.Playing);
+          const newActivity = newPresence?.activities.find(activity => activity.type === ActivityType.Playing);
+  
+          if (newActivity) {
+            console.log("New presence detected");
+            await this.recordActivity(newPresence, newActivity);
           }
+  
+          if (oldActivity) {
+            console.log("Old presence detected");
+            await this.recordActivity(oldPresence, oldActivity);
+          }
+        } catch (error) {
+          console.error('Error during presence update:', error);
+        }
+      });
+    }
 
-
-           if(oldActivity){
-              console.log('old activity')
-              console.log(oldPresence?.user?.id)
-
-              const activity = newPresence.activities.map(activity => ({
-                name: activity.name,
-                timestamps: activity.timestamps
-              }))
-
-              console.log(activity)
-           }
-           
-      })
-  }
-
+    private async recordActivity(presence: Presence | null, activity: Activity) {
+      if (!presence) return;
+  
+      const { user, activities } = presence;
+      const userId = user?.id;
+      const username = user?.username;
+      const timestamps = activities.map((activity) => activity.timestamps);
+      const start = timestamps[0]?.start;
+  
+      if (userId && username && start) {
+        await writeUserData(userId, username, activity.name, start.toISOString());
+      } else {
+        console.error('Missing data for user activity:', { userId, username, start });
+      }
+    }
+  
     private async registerSlashCommands () {
         const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
 
@@ -82,7 +84,6 @@ export class Bot {
 
         for (const file of commandFiles) {
           const command = await import(join(__dirname, "..", "commands", file));
-
           this.slashCommands.push(command.default.data);
           this.slashCommandsMap.set(command.default.data.name, command.default);
         }
@@ -105,7 +106,6 @@ export class Bot {
           if (!interaction.isChatInputCommand()) return;
 
           const command = this.slashCommandsMap.get(interaction.commandName)
-
           if (!command) return;
 
           try {
