@@ -6,7 +6,7 @@ export interface Duration {
 }
 
 export interface UserData {
-    userId : string;
+    userId : number;
     username : string;
     activity : {
         activityName : string;

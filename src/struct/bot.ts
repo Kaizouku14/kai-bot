@@ -29,37 +29,34 @@ export class Bot {
             console.log(`Ready! Logged in as ${client.user?.tag}`);
                    
             keepAlive({ port : config.PORT });
-         // this.registerSlashCommands();
+            this.registerSlashCommands();
         })
 
         this.client.on("warn", (info) => console.log(info));
         this.client.on("error", console.error);
 
-        this.onPresenceUpdate()
-      // this.onInteractionCreate();
+        this.onPresenceUpdate();
+        this.onInteractionCreate();
     }
 
     private onPresenceUpdate() {
-      this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence: Presence) => {
+      this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence : Presence) => {
         try {
-          if (oldPresence?.user?.bot || newPresence.user?.bot) return;
-  
-          const newActivity = newPresence.activities.find(activity => activity.type === ActivityType.Playing);
+          if (newPresence.user?.bot || !newPresence.activities ) return;
+
           const oldActivity = oldPresence?.activities.find(activity => activity.type === ActivityType.Playing);
-
-          if (newActivity) {
-            const { id , username } = newPresence?.user || {};
-
-            console.log("New Presence")
+          const newActivity = newPresence.activities.find(activity => activity.type === ActivityType.Playing);
+  
+          if (newActivity && (!oldActivity || newActivity.name !== oldActivity.name ||
+              newActivity.timestamps?.start?.getTime() !== oldActivity.timestamps?.start?.getTime())) {
+            const { id, username } = newPresence.user || {};
             await this.recordActivity(id, username, newActivity);
-          }
+        }
 
-          if(oldActivity){
-            const { id , username } = oldPresence?.user || {};
-       
-            console.log('old Activity')             
+        if (oldActivity && (!newActivity || oldActivity.name !== newActivity.name || oldActivity.timestamps?.end)) {
+            const { id, username } = oldPresence?.user || {};
             await this.recordActivity(id, username, oldActivity);
-          }
+        }
   
         } catch (error) {
           console.error('Error during presence update:', error);
@@ -68,17 +65,20 @@ export class Bot {
     }
 
     private async recordActivity(userId : string | undefined, username : string | undefined , activity: Activity) {
-      if (!userId || !username) return;
-  
-      const timestamps = activity.timestamps;
-      if (!timestamps || !timestamps.start) return;
+      try {
+          if (!userId || !username) return;
 
-      const newPresenceStart = activity.timestamps?.start;
-      const activityName = activity.name;
-      const duration = calculateDuration(newPresenceStart);
-      const activities = [{ activityName , duration}] 
+          const { timestamps, name } = activity;
+          if (!timestamps || !timestamps.start || timestamps.start.getTime() === Date.now()) return;
 
-      await writeUserData(userId, username, activities)
+          const newPresenceStart = timestamps.start;
+          const duration = calculateDuration(newPresenceStart);
+          const activities = [{ activityName: name, duration }];
+
+          await writeUserData(parseInt(userId), username, activities);
+      } catch (error) {
+          console.error('Error recording activity:', error);
+      }
     }
   
     private async registerSlashCommands () {

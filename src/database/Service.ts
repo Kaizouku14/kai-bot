@@ -3,7 +3,7 @@ import db from './connection';
 import { Duration, UserData } from '../interfaces/UserData';
 import { addDurations } from "../utils/util";
 
-export const writeUserData = async (userId: string, username: string, activities: { activityName : string, duration: Duration}[]):
+export const writeUserData = async (userId: number, username: string, activities: { activityName : string, duration: Duration}[]):
     Promise<void> => {
   try {
         const data: UserData = {
@@ -15,30 +15,39 @@ export const writeUserData = async (userId: string, username: string, activities
       const isValidUser = await validateUser(userId, activities);
 
       if (isValidUser) {
-          // Update existing data or handle accordingly
           console.log("User Activity Updated SuccessFully!");
       } else {
           await push(ref(db, `activities`), data);
           console.log(`user activity successfully added`);
       }
+
   } catch (error) {
       console.error('Error writing data:', error);
   }
 };
 
-// Function to check if user exists and validate activity
-const validateUser = async (userId: string , newActivities: { activityName : string, duration: Duration}[] ): Promise<boolean> => {
-    const userRef = ref(db, `activities`);
+const fetchUserData = async (userId: number): Promise<{ key: string, data: UserData } | null> => {
+    const userRef = ref(db, 'activities');
+    const userQuery = query(userRef, orderByChild('userId'), equalTo(userId));
+    const snapshot = await get(userQuery);
+
+    if (snapshot.exists()) {
+        const userData = snapshot.val();
+        const userKey = Object.keys(userData)[0];
+        return { key: userKey, data: userData[userKey] as UserData };
+    } else {
+        console.log(`No activities found for user ID: ${userId}`);
+        return null;
+    }
+};
+
+export const validateUser = async (userId: number, newActivities: { activityName: string, duration: Duration }[]): Promise<boolean> => {
     try {
-        const userQuery = query(userRef, orderByChild('userId'), equalTo(userId));
-        const snapshot = await get(userQuery);
+        const userRecord = await fetchUserData(userId);
 
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            const userKey = Object.keys(userData)[0];
-            const existingUserData = userData[userKey] as UserData;
+        if (userRecord) {
+            const { key, data: existingUserData } = userRecord;
 
-            // Update user's activity duration
             for (const newActivity of newActivities) {
                 const existingActivity = existingUserData.activity.find(activity => activity.activityName === newActivity.activityName);
                 if (existingActivity) {
@@ -48,16 +57,50 @@ const validateUser = async (userId: string , newActivities: { activityName : str
                 }
             }
 
-            // Write updated data back to the database
-            await update(ref(db, `activities/${userKey}`), existingUserData);
-
+            await update(ref(db, `activities/${key}`), existingUserData);
             return true;
         } else {
-            console.log('User not found');
             return false;
         }
     } catch (error: any) {
         console.error('Error validating user:', error.message);
         return false;
+    }
+};
+
+export const getAllUserActivity = async (userId: number): Promise<UserData | null> => {
+    try {
+        const userRecord = await fetchUserData(userId);
+
+        if (userRecord) {
+            return userRecord.data;
+        } else {
+            return null;
+        }
+    } catch (error: any) {
+        console.error('Error fetching user activity:', error.message);
+        return null;
+    }
+};
+
+export const getSpecificUserActivity = async (userId: number, activityName: string):
+          Promise<{ activityName: string, duration: Duration } | null> => {
+    try {
+        const userRecord = await fetchUserData(userId);
+
+        if (userRecord) {
+            const activity = userRecord.data.activity.find(activity => activity.activityName === activityName);
+            if (activity) {
+                return activity;
+            } else {
+                console.log(`Activity ${activityName} not found for user ID: ${userId}`);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    } catch (error: any) {
+        console.error('Error fetching specific activity:', error.message);
+        return null;
     }
 };
