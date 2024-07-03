@@ -57,10 +57,8 @@ export class Bot {
           if(oldActivity){
             const { id , username } = oldPresence?.user || {};
        
-            console.log('old Activity')
-             const oldPresenceStart = oldActivity.timestamps?.start;
-             
-            //await this.recordActivity(id, username, oldActivity);
+            console.log('old Activity')             
+            await this.recordActivity(id, username, oldActivity);
           }
   
         } catch (error) {
