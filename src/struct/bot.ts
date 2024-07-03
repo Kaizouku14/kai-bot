@@ -15,6 +15,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import keepAlive from "../utils/keepAlive";
 import config from "../utils/config";
+import { calculateDuration } from "../utils/util";
 import { writeUserData } from "../database/Service";
 
 export class Bot {
@@ -41,40 +42,45 @@ export class Bot {
     private onPresenceUpdate() {
       this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence: Presence) => {
         try {
-          if (oldPresence?.user?.bot || newPresence?.user?.bot) return;
+          if (oldPresence?.user?.bot || newPresence.user?.bot) return;
   
+          const newActivity = newPresence.activities.find(activity => activity.type === ActivityType.Playing);
           const oldActivity = oldPresence?.activities.find(activity => activity.type === ActivityType.Playing);
-          const newActivity = newPresence?.activities.find(activity => activity.type === ActivityType.Playing);
-  
+
           if (newActivity) {
-            console.log("New presence detected");
-            await this.recordActivity(newPresence, newActivity);
+            const { id , username } = newPresence?.user || {};
+
+            console.log("New Presence")
+            await this.recordActivity(id, username, newActivity);
+          }
+
+          if(oldActivity){
+            const { id , username } = oldPresence?.user || {};
+       
+            console.log('old Activity')
+             const oldPresenceStart = oldActivity.timestamps?.start;
+             
+            //await this.recordActivity(id, username, oldActivity);
           }
   
-          if (oldActivity) {
-            console.log("Old presence detected");
-            await this.recordActivity(oldPresence, oldActivity);
-          }
         } catch (error) {
           console.error('Error during presence update:', error);
         }
       });
     }
 
-    private async recordActivity(presence: Presence | null, activity: Activity) {
-      if (!presence) return;
+    private async recordActivity(userId : string | undefined, username : string | undefined , activity: Activity) {
+      if (!userId || !username) return;
   
-      const { user, activities } = presence;
-      const userId = user?.id;
-      const username = user?.username;
-      const timestamps = activities.map((activity) => activity.timestamps);
-      const start = timestamps[0]?.start;
-  
-      if (userId && username && start) {
-        await writeUserData(userId, username, activity.name, start.toISOString());
-      } else {
-        console.error('Missing data for user activity:', { userId, username, start });
-      }
+      const timestamps = activity.timestamps;
+      if (!timestamps || !timestamps.start) return;
+
+      const newPresenceStart = activity.timestamps?.start;
+      const activityName = activity.name;
+      const duration = calculateDuration(newPresenceStart);
+      const activities = [{ activityName , duration}] 
+
+      await writeUserData(userId, username, activities)
     }
   
     private async registerSlashCommands () {
