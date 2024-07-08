@@ -1,4 +1,4 @@
-import { Config } from "../interfaces/config"
+import { Config } from '../interfaces/Config'
 import "dotenv/config"
 
 let config : Config = {

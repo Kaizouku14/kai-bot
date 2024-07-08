@@ -2,7 +2,6 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder} from "d
 import { getAllUserActivity, getSpecificUserActivity } from "../database/Service";
 import { UserData, Duration } from "../interfaces/UserData";
 
-
 function formatDuration(duration: Duration): string {
     const parts: string[] = []; 
     if (duration.days > 0) parts.push(`${duration.days} days`);
