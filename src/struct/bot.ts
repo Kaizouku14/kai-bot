@@ -10,7 +10,7 @@ import { Client,
   ActivityType,
   Activity
 } from "discord.js";
-import { Command } from "../interfaces/command";
+import { Command } from "../interfaces/Command"
 import { readdirSync } from "fs";
 import { join } from "path";
 import keepAlive from "../utils/keepAlive";
