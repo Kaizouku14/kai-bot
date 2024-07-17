@@ -6,6 +6,6 @@ export const bot = new Bot(new Client({ intents : [
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
   ]}
 ))

@@ -39,3 +39,19 @@ export function addDurations(oldDuration: Duration, newDuration: Duration): Dura
         seconds: totalSeconds % 60,
     };
 }
+
+export function parseDuration(duration: string): number | null {
+    const match = duration.match(/^(\d+)([smhd])$/);
+    if (!match) return null;
+  
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+  
+    switch (unit) {
+      case 's': return value * 1000;        // seconds to milliseconds
+      case 'm': return value * 60 * 1000;   // minutes to milliseconds
+      case 'h': return value * 60 * 60 * 1000; // hours to milliseconds
+      case 'd': return value * 24 * 60 * 60 * 1000; // days to milliseconds
+      default: return null;
+    }
+  }
