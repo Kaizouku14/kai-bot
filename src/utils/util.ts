@@ -1,5 +1,15 @@
 import { Duration } from "../interfaces/UserData";
 
+/**
+ * Calculate the duration between the given start time and the current time.
+ *
+ * Returns an object with days, hours, minutes, and seconds properties.
+ *
+ * If the start time is invalid or in the future, returns an object with all properties set to 0.
+ *
+ * @param {Date | string | null | undefined} timeStart The start time to calculate the duration from.
+ * @returns {Duration}
+ */
 export function calculateDuration(timeStart: Date | string | null | undefined): Duration {
     if (!timeStart) return { days: 0, hours: 0, minutes: 0, seconds: 0 }; // Return default values for invalid start time
 
@@ -26,6 +36,18 @@ export function calculateDuration(timeStart: Date | string | null | undefined): 
     return { days, hours, minutes, seconds };
 }
 
+/**
+ * Adds two durations together and returns the result.
+ *
+ * @param {Duration} oldDuration The first duration to add.
+ * @param {Duration} newDuration The second duration to add.
+ * @returns {Duration} The result of adding the two durations.
+ * @example
+ * const duration1 = { days: 1, hours: 2, minutes: 3, seconds: 4 };
+ * const duration2 = { days: 5, hours: 6, minutes: 7, seconds: 8 };
+ * const result = addDurations(duration1, duration2);
+ * // result is { days: 6, hours: 8, minutes: 10, seconds: 12 }
+ */
 export function addDurations(oldDuration: Duration, newDuration: Duration): Duration {
     const totalSeconds = oldDuration.seconds + newDuration.seconds;
     const totalMinutes = oldDuration.minutes + newDuration.minutes + Math.floor(totalSeconds / 60);
@@ -40,12 +62,25 @@ export function addDurations(oldDuration: Duration, newDuration: Duration): Dura
     };
 }
 
+    /**
+     * Parse a string duration into milliseconds.
+     *
+     * Accepted formats are:
+     *   - `Xs` for seconds
+     *   - `Xm` for minutes
+     *   - `Xh` for hours
+     *   - `Xd` for days
+     *
+     * Returns null if the format is invalid.
+     * @param {string} duration
+     * @returns {number | null}
+     */
 export function parseDuration(duration: string): number | null {
     const match = duration.match(/^(\d+)([smhd])$/);
     if (!match) return null;
   
     const value = parseInt(match[1], 10);
-    const unit = match[2];
+    const unit = match[2].toLowerCase();
   
     switch (unit) {
       case 's': return value * 1000;        // seconds to milliseconds

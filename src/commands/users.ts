@@ -17,13 +17,14 @@ export default {
                   .setRequired(true)
                   .addChoices(
                     { name: 'mute', value: 'mute' },
-                    { name: 'timeout', value: 'timeout' }
+                    { name: 'timeout', value: 'timeout'},
                   )
-            ).addStringOption(option => option
+            )
+            .addStringOption(option => option
                   .setName('duration')
                   .setDescription('Specify the duration for timeout (e.g., "10m" for 10 minutes, "1h" for 1 hour).')
                   .setRequired(false)
-              ),
+            ),
     cooldown: 3,
     permissions : [PermissionFlagsBits.MuteMembers, PermissionFlagsBits.ModerateMembers],
     async execute(interaction : ChatInputCommandInteraction){
@@ -63,11 +64,32 @@ export default {
                     await interaction.reply({ content: 'User is not in a voice channel.', ephemeral: true });
                     return;
                 }
+
+                if (!argsDuration) {
+                    await interaction.reply({ content: 'Please provide a duration for the timeout.', ephemeral: true });
+                    return;
+                }
         
                 await member?.voice.setMute(true);
                 await interaction.reply(`User ${argsUser.username} has been muted.`);
-                    
-           } else {
+
+                const durationMs = parseDuration(argsDuration);
+                if (!durationMs) {
+                    await interaction.reply({ content: 'Invalid duration format. Please use "10m" for 10 minutes, "1h" for 1 hour, etc.', ephemeral: true });
+                    return;
+                }
+
+                setTimeout(async () => {
+                    try {
+                        await member?.voice.setMute(false);
+                        await interaction.followUp(`User ${argsUser.username} has been unmuted.`);
+                    } catch (error) {
+                        console.error('Failed to unmute user:', error);
+                        await interaction.followUp({ content: `An error occurred while trying to unmute ${argsUser.username}.`, ephemeral: true });
+                    }
+                }, durationMs);
+                
+           }else {
               await interaction.reply({ content: 'Invalid command. Please use either "mute" or "timeout".', ephemeral: true });
            }
         
