@@ -1,22 +1,18 @@
 {
   "name": "kai-bot",
-  "type": "commonjs",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.ts",
-  "scripts": {
-    "start": "ts-node src/index.ts"
+  "main": "./src/index.ts",
+ "scripts": {
+    "start": "ts-node ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
-    "firebase": "^10.12.2",
-    "ts-node": "^10.9.2"
+    "firebase": "^10.12.2"
   },
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "ts-node": "^10.9.2"
   }
 }
