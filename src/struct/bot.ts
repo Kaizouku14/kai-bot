@@ -8,7 +8,8 @@ import { Client,
   Interaction,
   Presence,
   ActivityType,
-  Activity
+  Activity,
+  GuildMember
 } from "discord.js";
 import { Command } from "../interfaces/Command"
 import { readdirSync } from "fs";
@@ -30,6 +31,10 @@ export class Bot {
                    
             keepAlive({ port : config.PORT });
             this.registerSlashCommands();
+        });
+
+        this.client.on("guildMemberAdd", (member) => {
+           this.onGuildMemberAdd(member);
         })
 
         this.client.on("warn", (info) => console.log(info));
@@ -38,6 +43,25 @@ export class Bot {
         this.onPresenceUpdate();
         this.onInteractionCreate();
     }
+  
+    private async onGuildMemberAdd (member: GuildMember) {
+      const systemChannel = member.guild.systemChannel;
+      const role = member.guild.roles.cache.get('1280128075874570250');
+
+      if (systemChannel) {
+        await systemChannel.send(`Welcome to the server, ${member}!`).catch(console.error);
+      }
+
+      if (role) {
+        try {
+          await member.roles.add(role);
+          console.log(`Assigned the ${role.name} role to ${member.user.tag}`);
+        } catch (error) {
+          console.error(`Error assigning role: ${error}`);
+        }
+      }
+    }
+   
 
     private onPresenceUpdate() {
       this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence : Presence) => {

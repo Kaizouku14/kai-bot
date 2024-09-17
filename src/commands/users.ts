@@ -1,11 +1,11 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder,Permissions } from "discord.js";
 import { parseDuration } from "../utils/util";
-
 
 export default {
    data : new SlashCommandBuilder()
             .setName('do')
             .setDescription('A command to mute/timeout a user.')
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
             .addUserOption(option => option
                  .setName('user')
                  .setDescription('user to mute/timeout')
@@ -23,6 +23,7 @@ export default {
             .addStringOption(option => option
                   .setName('duration')
                   .setDescription('Specify the duration for timeout (e.g., "10m" for 10 minutes, "1h" for 1 hour).')
+                  .setRequired(true)
                   .setRequired(false)
             ),
     cooldown: 3,
@@ -42,7 +43,7 @@ export default {
 
             if(argsCommand === 'timeout'){
                 if (!argsDuration) {
-                    await interaction.reply({ content: 'Please provide a duration for the timeout.', ephemeral: true });
+                    await interaction.reply({ content: 'Please provide a valid duration for the timeout.', ephemeral: true });
                     return;
                 }
 
@@ -54,7 +55,7 @@ export default {
 
                 if (member) {
                     await (member).timeout(durationMs);
-                    await interaction.reply({ content : `User ${argsUser.username} has been timed out for ${durationMs}.`, ephemeral: true});
+                    await interaction.reply({ content : `User ${argsUser.username} has been timed out for ${argsDuration}.`});
                 } else {
                     await interaction.reply({ content: 'Could not find the member in this guild.', ephemeral: true });
                 }   
