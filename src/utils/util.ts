@@ -123,7 +123,6 @@ export const checkMilestone = async (userId : string, username : string , count 
                 await updateRank(userId, rank);
 
                 const description = `Hey ${username}, you've reached a count of \`${count}\`! Keep it up!`;
-
                 const embed = new EmbedBuilder()
                     .setTitle('🎉 Achievement 🎉')
                     .setColor('#0099ff')
@@ -139,3 +138,14 @@ export const checkMilestone = async (userId : string, username : string , count 
 
     return null; 
 };
+
+export const WelcomeUser = (username : string) => {
+    const description = `Hey \`${username}\`, congratulations! You've become a racist; keep it up!`;
+    const embed = new EmbedBuilder()
+        .setTitle('🎉 Achievement Unlocked 🎉')
+        .setColor('#0099ff')
+        .setDescription(description)
+        .addFields({ name: 'Newbie', value: 'New racist found!', inline: true });
+
+    return embed;             
+}

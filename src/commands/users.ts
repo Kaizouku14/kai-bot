@@ -6,11 +6,6 @@ export default {
             .setName('do')
             .setDescription('A command to mute/timeout a user.')
             .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-            .addUserOption(option => option
-                 .setName('user')
-                 .setDescription('user to mute/timeout')
-                 .setRequired(true)
-            )
             .addStringOption(option => option
                   .setName('command')
                   .setDescription('Choose a command.')
@@ -20,11 +15,15 @@ export default {
                     { name: 'timeout', value: 'timeout'},
                   )
             )
+            .addUserOption(option => option
+                .setName('user')
+                .setDescription('user to mute/timeout')
+                .setRequired(true)
+            )
             .addStringOption(option => option
                   .setName('duration')
                   .setDescription('Specify the duration for timeout (e.g., "10m" for 10 minutes, "1h" for 1 hour).')
                   .setRequired(true)
-                  .setRequired(false)
             ),
     cooldown: 3,
     permissions : [PermissionFlagsBits.MuteMembers, PermissionFlagsBits.ModerateMembers],

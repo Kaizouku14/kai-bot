@@ -17,7 +17,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import keepAlive from "../utils/keepAlive";
 import config from "../utils/config";
-import { calculateDuration, checkMilestone } from "../utils/util";
+import { calculateDuration, checkMilestone, WelcomeUser } from "../utils/util";
 import { writeUserData } from "../utils/activityStats";
 import { checkRecord, retrieveCount, writeViolationStats } from "../utils/violationStats";
 
@@ -78,6 +78,7 @@ export class Bot {
              //console.log('user count updated successfully');
           }else{
              writeViolationStats({ userId, username, count, rank : 'Newbie'})  
+             await message.channel.send({ embeds : [WelcomeUser(username)] });
           }
 
           const result = await retrieveCount(message.author.id);

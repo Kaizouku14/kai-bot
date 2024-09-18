@@ -69,7 +69,7 @@ const updateUserField = async (userId : string, field : string, value : number |
 };
 
 export const retrieveCount = async (userId : string) => {
-    const usersRef = ref(db, 'users');
+    const usersRef = ref(db, 'violations');
 
     try {
         const snapshot = await get(usersRef);
@@ -91,7 +91,7 @@ export const retrieveCount = async (userId : string) => {
 }
 
 export const retrieveAll = async () => {
-    const usersRef = ref(db, 'users');
+    const usersRef = ref(db, 'violations');
     const usersQuery = query(usersRef, orderByChild('count'));
 
     try {
