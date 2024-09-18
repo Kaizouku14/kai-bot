@@ -9,7 +9,8 @@ import { Client,
   Presence,
   ActivityType,
   Activity,
-  GuildMember
+  GuildMember,
+  Message
 } from "discord.js";
 import { Command } from "../interfaces/Command"
 import { readdirSync } from "fs";
@@ -17,7 +18,8 @@ import { join } from "path";
 import keepAlive from "../utils/keepAlive";
 import config from "../utils/config";
 import { calculateDuration } from "../utils/util";
-import { writeUserData } from "../database/Service";
+import { writeUserData } from "../utils/activityStats";
+import { checkRecord, writeViolationStats } from "../utils/violationStats";
 
 export class Bot {
     public slashCommands = new Array<ApplicationCommandDataResolvable>();
@@ -33,20 +35,18 @@ export class Bot {
             this.registerSlashCommands();
         });
 
-        this.client.on("guildMemberAdd", (member) => {
-           this.onGuildMemberAdd(member);
-        })
-
         this.client.on("warn", (info) => console.log(info));
         this.client.on("error", console.error);
-
+        this.client.on("guildMemberAdd", (member) => this.onGuildMemberAdd(member));
+        this.client.on("messageCreate", (message) => this.onMessageCreate(message));
         this.onPresenceUpdate();
         this.onInteractionCreate();
     }
   
     private async onGuildMemberAdd (member: GuildMember) {
+      const roleId = '1280128075874570250';
       const systemChannel = member.guild.systemChannel;
-      const role = member.guild.roles.cache.get('1280128075874570250');
+      const role = member.guild.roles.cache.get(roleId);
 
       if (systemChannel) {
         await systemChannel.send(`Welcome to the server, ${member}!`).catch(console.error);
@@ -61,8 +61,27 @@ export class Bot {
         }
       }
     }
-   
 
+    private async onMessageCreate (message : Message){
+      if(message.author.bot) return;
+
+      const username = message.author.username;
+      const userId = message.author.id;
+      const msg = message.content.split(/\W+/).filter(Boolean);
+      const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
+
+      if(filteredMessage.length > 0){
+          const count = filteredMessage.length;
+          const isValidUser = await checkRecord({ userId, count});
+
+          if(isValidUser){
+             //console.log('user count updated successfully');
+          }else{
+             writeViolationStats({ userId, username, count, rank : 'Newbie'})  
+          }
+      }
+    }
+ 
     private onPresenceUpdate() {
       this.client.on('presenceUpdate', async (oldPresence: Presence | null, newPresence : Presence) => {
         try {

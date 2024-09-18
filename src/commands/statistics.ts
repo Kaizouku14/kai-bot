@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder} from "discord.js";
-import { getAllUserActivity, getSpecificUserActivity } from "../database/Service";
+import { getAllUserActivity, getSpecificUserActivity } from "../utils/activityStats"
 import { UserData, Duration } from "../interfaces/UserData";
 
 function formatDuration(duration: Duration): string {

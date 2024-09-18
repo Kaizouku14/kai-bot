@@ -1,5 +1,5 @@
 import { ref, push, get, update, query, orderByChild, equalTo } from "firebase/database";
-import db from './connection';
+import db from '../database/connection';
 import { Duration, UserData } from '../interfaces/UserData';
 import { addDurations } from "../utils/util";
 
