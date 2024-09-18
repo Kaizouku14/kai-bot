@@ -1,4 +1,6 @@
+import { EmbedBuilder } from "discord.js";
 import { Duration } from "../interfaces/UserData";
+import { updateRank } from "./violationStats";
 
 /**
  * Calculate the duration between the given start time and the current time.
@@ -90,3 +92,50 @@ export function parseDuration(duration: string): number | null {
       default: return null;
     }
   }
+
+    /**
+     * Checks if the given user has reached a milestone count and returns an embed accordingly.
+     * Milestones are:
+     *   - 50: Veteran
+     *   - 101: Legend
+     *   - 501: Master
+     *   - 1001: THE GOAT
+     *
+     * Returns null if no milestone is reached.
+     * @param {string} userId The user's ID to check.
+     * @param {string} username The user's name to mention in the embed.
+     * @param {number} count The current count to check against.
+     * @returns {MessageEmbed | null}
+     */
+export const checkMilestone = async (userId : string, username : string , count : number) => {
+    if (count < 50) return null;
+
+    const ranks = [
+        { min: 50, max: 100, rank: 'Veteran' },
+        { min: 101, max: 500, rank: 'Legend' },
+        { min: 501, max: 1000, rank: 'Master' },
+        { min: 1001, max: Infinity, rank: 'THE GOAT' }
+    ];
+
+    for (const { min, max, rank } of ranks) {
+        if (count >= min && count <= max) {
+            try {
+                await updateRank(userId, rank);
+
+                const description = `Hey ${username}, you've reached a count of \`${count}\`! Keep it up!`;
+
+                const embed = new EmbedBuilder()
+                    .setTitle('🎉 Achievement 🎉')
+                    .setColor('#0099ff')
+                    .setDescription(description)
+                    .addFields({ name: 'Milestone', value: rank, inline: true });
+                
+                return embed;
+            } catch (error) {
+                console.error('Error updating rank:', error);
+            }
+        }
+    }
+
+    return null; 
+};
