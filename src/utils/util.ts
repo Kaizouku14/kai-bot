@@ -159,7 +159,7 @@ export const getGreetingMessage = (message : string) => {
     } else if (message.match(/good\s*evening/i)) {
         return "Good evening! My nigga, I hope you're winding down well!";
     } else if (message.match(/good\s*night/i)) {
-        return "Good night! Sleep well and have sweet dreams! My nigga";
+        return "Edi matulog ka tanginamo, goodnight goodnight kapa eh!";
     }
 
     return null;
