@@ -71,8 +71,8 @@ export class Bot {
 
       const msg = msgContent.split(/\W+/).filter(Boolean);
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
-      const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
-
+      const greetMessage = msgContent.match(/good\s(morning|afternoon|aftie|evening|eve|night)/i);
+      
       if (greetMessage) { 
         const greeting = getGreetingMessage(greetMessage[0]); 
         await message.reply({ content: `${greeting} <@${message.author.id}>` });
