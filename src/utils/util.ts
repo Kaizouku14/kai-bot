@@ -149,3 +149,18 @@ export const WelcomeUser = (username : string) => {
 
     return embed;             
 }
+
+
+export const getGreetingMessage = (message : string) => {
+    if (message.match(/good\s*morning/i)) {
+        return "Good morning! My nigga! Hope you have a great start to your day!";
+    } else if (message.match(/good\s*afternoon/i)) {
+        return "Good afternoon! My nigga, hope your day is going well!";
+    } else if (message.match(/good\s*evening/i)) {
+        return "Good evening! My nigga, I hope you're winding down well!";
+    } else if (message.match(/good\s*night/i)) {
+        return "Good night! Sleep well and have sweet dreams! My nigga";
+    }
+
+    return null;
+}

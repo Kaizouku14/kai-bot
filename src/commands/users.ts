@@ -59,7 +59,7 @@ export default {
                     await interaction.reply({ content: 'Could not find the member in this guild.', ephemeral: true });
                 }   
 
-           } else if (argsCommand === 'mute'){
+           } else if (argsCommand === 'mute'){        
                 if (!member?.voice.channel) {
                     await interaction.reply({ content: 'User is not in a voice channel.', ephemeral: true });
                     return;
@@ -71,7 +71,7 @@ export default {
                 }
         
                 await member?.voice.setMute(true);
-                await interaction.reply(`User ${argsUser.username} has been muted.`);
+                await interaction.reply(`User ${argsUser.username} has been muted for, ${argsDuration}`);
 
                 const durationMs = parseDuration(argsDuration);
                 if (!durationMs) {

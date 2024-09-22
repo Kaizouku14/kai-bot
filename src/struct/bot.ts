@@ -17,7 +17,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import keepAlive from "../utils/keepAlive";
 import config from "../utils/config";
-import { calculateDuration, checkMilestone, WelcomeUser } from "../utils/util";
+import { calculateDuration, checkMilestone, getGreetingMessage, WelcomeUser } from "../utils/util";
 import { writeUserData } from "../utils/activityStats";
 import { checkRecord, retrieveCount, writeViolationStats } from "../utils/violationStats";
 
@@ -67,8 +67,16 @@ export class Bot {
 
       const username = message.author.username;
       const userId = message.author.id;
-      const msg = message.content.split(/\W+/).filter(Boolean);
+      const msgContent = message.content;
+
+      const msg = msgContent.split(/\W+/).filter(Boolean);
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
+      const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
+
+      if (greetMessage) { 
+        const greeting = getGreetingMessage(greetMessage[0]); 
+        await message.reply({ content: `${greeting} <@${message.author.id}>` });
+      } 
 
       if(filteredMessage.length > 0){
           const count = filteredMessage.length;
