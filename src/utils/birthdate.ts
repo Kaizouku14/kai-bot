@@ -68,14 +68,21 @@ export const checkTodayBirthdays = async (): Promise<{ id: string; date: string 
         return birthDateFormatted === todayFormatted && !user.greeted; 
     });
 
-    const updates: { [key: string]: { greeted: boolean } } = {};
-    birthdayUsers.forEach(user => {
-        updates[`birthdate/${user.id}`] = { greeted: true }; 
-    });
-
-    if (Object.keys(updates).length > 0) {
-        await update(ref(db), updates);
-    }
+    await Promise.all(birthdayUsers.map(user => updateUserData(user.id)));
 
     return birthdayUsers.map(user => ({ id: user.id, date: user.date }));
+};
+
+const updateUserData = async (id: string) => {
+    const userRef = ref(db, 'birthdate');
+    const userQuery = query(userRef, orderByChild('id'), equalTo(id));
+    const snapshot = await get(userQuery);
+
+    if (snapshot.exists()) {
+        const userKey = Object.keys(snapshot.val())[0];
+        const specificUserRef = ref(db, `birthdate/${userKey}`); 
+        await update(specificUserRef, { greeted: true });
+    } else {
+        console.log('User not found');
+    }
 };

@@ -81,7 +81,7 @@ export class Bot {
     
       if (birthdayUsers.length > 0 && announcementChannel) {
           birthdayUsers.forEach((user: { id: string; date: string }) => {                   
-            announcementChannel.send(`@everyone 🎉🎂 Attention, everyone! 🎂🎉
+            message.reply(`@everyone 🎉🎂 Attention, everyone! 🎂🎉
       
               Join me in wishing a very happy birthday to our nigga <@${user.id}>! 🎈 May your day be filled with joy, laughter, and unforgettable moments. Here’s to another amazing year ahead! 🥳💖 
             `);
