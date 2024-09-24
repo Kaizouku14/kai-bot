@@ -71,11 +71,21 @@ export class Bot {
 
       const msg = msgContent.split(/\W+/).filter(Boolean);
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
-      const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
 
+      const greetJopay = msg.filter(message => message.match('527915961118883872'));
+      
+
+      const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
+  
       if (greetMessage) { 
         const greeting = getGreetingMessage(greetMessage[0]); 
         await message.reply({ content: `${greeting} <@${message.author.id}>` });
+      }else if(greetJopay){
+        const greatReply = getGreetingMessage(greetJopay[0]);
+        await message.reply({ content : `
+         Automated message: 
+        Liz (<@527915961118883872>) wants to say: **${greatReply}** to you, <@${message.author.id}>.
+        `})
       } 
 
       if(filteredMessage.length > 0){

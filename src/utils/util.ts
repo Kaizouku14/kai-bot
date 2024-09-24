@@ -150,8 +150,8 @@ export const WelcomeUser = (username : string) => {
     return embed;             
 }
 
-
 export const getGreetingMessage = (message : string) => {
+
     if (message.match(/good\s*morning/i)) {
         return "Good morning! My nigga! Hope you have a great start to your day!";
     } else if (message.match(/good\s*afternoon/i)) {
@@ -159,7 +159,9 @@ export const getGreetingMessage = (message : string) => {
     } else if (message.match(/good\s*evening/i)) {
         return "Good evening! My nigga, I hope you're winding down well!";
     } else if (message.match(/good\s*night/i)) {
-        return "Good night! Sleep well and have sweet dreams! My nigga";
+        return "Matulog kana tanginamo need pang goodnight eh";
+    }else if(message.match('527915961118883872')){
+        return "What's up My nigga"
     }
 
     return null;
