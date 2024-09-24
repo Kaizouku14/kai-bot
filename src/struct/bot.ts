@@ -76,14 +76,16 @@ export class Bot {
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
       const greetJopay = msg.filter(message => message.match('527915961118883872'));
       const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
-
       const announcementChannel = this.client.channels.cache.get(allowedChannelId) as TextChannel;
       const birthdayUsers = await checkTodayBirthdays();
     
       if (birthdayUsers.length > 0 && announcementChannel) {
-        birthdayUsers.forEach((user: { user: string; date: string }) => {
-          announcementChannel.send(`🎉 Happy Birthday My nigga, <@${user.user}>! 🎂 Have a great day!`);
-        });
+          birthdayUsers.forEach((user: { id: string; date: string }) => {                   
+            announcementChannel.send(`@everyone 🎉🎂 Attention, everyone! 🎂🎉
+      
+              Join me in wishing a very happy birthday to our nigga <@${user.id}>! 🎈 May your day be filled with joy, laughter, and unforgettable moments. Here’s to another amazing year ahead! 🥳💖 
+            `);
+          });
       } 
 
       if (greetMessage) { 

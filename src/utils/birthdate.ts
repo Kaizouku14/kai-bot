@@ -1,11 +1,12 @@
-import { equalTo, get, orderByChild, push, query, ref } from 'firebase/database';
+import { equalTo, get, orderByChild, push, query, ref, update } from 'firebase/database';
 import db from '../database/connection';
 
 
 interface birthdate {
     id : string,
     user : string,
-    date : string
+    date : string,
+    greeted : boolean
 }
 
 export const addUserBirthDate = async (id : string, user : string, date : string) => {
@@ -19,7 +20,7 @@ export const addUserBirthDate = async (id : string, user : string, date : string
       return "User already exists." ;
     }
 
-    const data = { id, user, date };
+    const data = { id, user, date , greeted : false};
     await push(ref(db, `birthdate`), data);
     return "User birthdate added successfully.";
 
@@ -49,19 +50,32 @@ const getAllUserBirthDate = async (): Promise<birthdate[] | undefined> => {
     } 
 }
 
-export const checkTodayBirthdays = async (): Promise<{user: string, date: string}[]> => {
+export const checkTodayBirthdays = async (): Promise<{ id: string; date: string }[]> => {
     const usersData: birthdate[] | undefined = await getAllUserBirthDate();
     if (!usersData) return [];
-  
-    // Get today's date in MM/DD format
+
     const today = new Date();
     const todayFormatted = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
-  
-    // Find users whose birthdate matches today (MM/DD)
+
+    // Find users whose birthdate matches today (MM/DD) and haven't been greeted
     const birthdayUsers = usersData.filter(user => {
-      const birthDateFormatted = user.date.slice(0, 5); // Get only MM/DD from the birthdate
-      return birthDateFormatted === todayFormatted;
+        if (!user.date) {
+            console.warn(`User with ID ${user.id} has no date.`);
+            return false; 
+        }
+        
+        const birthDateFormatted = user.date.slice(0, 5); // Get only MM/DD from the birthdate
+        return birthDateFormatted === todayFormatted && !user.greeted; 
     });
-  
-    return birthdayUsers.map(user => ({ user: user.user, date: user.date }));
-  };
+
+    const updates: { [key: string]: { greeted: boolean } } = {};
+    birthdayUsers.forEach(user => {
+        updates[`birthdate/${user.id}`] = { greeted: true }; 
+    });
+
+    if (Object.keys(updates).length > 0) {
+        await update(ref(db), updates);
+    }
+
+    return birthdayUsers.map(user => ({ id: user.id, date: user.date }));
+};
