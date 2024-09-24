@@ -10,7 +10,8 @@ import { Client,
   ActivityType,
   Activity,
   GuildMember,
-  Message
+  Message,
+  TextChannel
 } from "discord.js";
 import { Command } from "../interfaces/Command"
 import { readdirSync } from "fs";
@@ -20,6 +21,7 @@ import config from "../utils/config";
 import { calculateDuration, checkMilestone, getGreetingMessage, WelcomeUser } from "../utils/util";
 import { writeUserData } from "../utils/activityStats";
 import { checkRecord, retrieveCount, writeViolationStats } from "../utils/violationStats";
+import { checkTodayBirthdays } from "../utils/birthdate";
 
 export class Bot {
     public slashCommands = new Array<ApplicationCommandDataResolvable>();
@@ -68,23 +70,30 @@ export class Bot {
       const username = message.author.username;
       const userId = message.author.id;
       const msgContent = message.content;
+      const allowedChannelId = '1285252377250889768';
 
       const msg = msgContent.split(/\W+/).filter(Boolean);
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
-
       const greetJopay = msg.filter(message => message.match('527915961118883872'));
-      
-
       const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
-  
+
+      const announcementChannel = this.client.channels.cache.get(allowedChannelId) as TextChannel;
+      const birthdayUsers = await checkTodayBirthdays();
+    
+      if (birthdayUsers.length > 0 && announcementChannel) {
+        birthdayUsers.forEach((user: { user: string; date: string }) => {
+          announcementChannel.send(`🎉 Happy Birthday My nigga, <@${user.user}>! 🎂 Have a great day!`);
+        });
+      } 
+
       if (greetMessage) { 
         const greeting = getGreetingMessage(greetMessage[0]); 
         await message.reply({ content: `${greeting} <@${message.author.id}>` });
-      }else if(greetJopay){
+      }else if(greetJopay[0]){
         const greatReply = getGreetingMessage(greetJopay[0]);
         await message.reply({ content : `
-         Automated message: 
-        Liz (<@527915961118883872>) wants to say: **${greatReply}** to you, <@${message.author.id}>.
+         Automated message:  
+            Liz (<@527915961118883872>) wants to say: **${greatReply}** to you, <@${message.author.id}>.
         `})
       } 
 

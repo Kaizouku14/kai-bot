@@ -162,8 +162,9 @@ export const getGreetingMessage = (message : string) => {
         return "Matulog kana tanginamo need pang goodnight eh";
     }else if(message.match('527915961118883872')){
         return "What's up My nigga"
-        return "Edi matulog ka tanginamo, goodnight goodnight kapa eh!";
     }
 
     return null;
 }
+
+
