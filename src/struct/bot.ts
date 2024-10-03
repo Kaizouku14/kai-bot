@@ -18,7 +18,7 @@ import { readdirSync } from "fs";
 import { join } from "path";
 import keepAlive from "../utils/keepAlive";
 import config from "../utils/config";
-import { calculateDuration, checkMilestone, getGreetingMessage, WelcomeUser } from "../utils/util";
+import { calculateDuration, checkMilestone, WelcomeUser } from "../utils/util";
 import { writeUserData } from "../utils/activityStats";
 import { checkRecord, retrieveCount, writeViolationStats } from "../utils/violationStats";
 import { checkTodayBirthdays } from "../utils/birthdate";
@@ -71,12 +71,13 @@ export class Bot {
       const userId = message.author.id;
       const msgContent = message.content;
       const allowedChannelId = '1285252377250889768';
+      const racismchannelId = '1286669580332437615';
 
       const msg = msgContent.split(/\W+/).filter(Boolean);
       const filteredMessage = msg.filter(message => message.match(/nigger|nigga/i));
-      const greetJopay = msg.filter(message => message.match('527915961118883872'));
-      const greetMessage = msgContent.match(/good\s(morning|afternoon|evening|night)/i);
+      
       const announcementChannel = this.client.channels.cache.get(allowedChannelId) as TextChannel;
+
       const birthdayUsers = await checkTodayBirthdays();
     
       if (birthdayUsers.length > 0 && announcementChannel) {
@@ -86,17 +87,6 @@ export class Bot {
               Join me in wishing a very happy birthday to our nigga <@${user.id}>! 🎈 May your day be filled with joy, laughter, and unforgettable moments. Here’s to another amazing year ahead! 🥳💖 
             `);
           });
-      } 
-
-      if (greetMessage) { 
-        const greeting = getGreetingMessage(greetMessage[0]); 
-        await message.reply({ content: `${greeting} <@${message.author.id}>` });
-      }else if(greetJopay[0]){
-        const greatReply = getGreetingMessage(greetJopay[0]);
-        await message.reply({ content : `
-         Automated message:  
-            Liz (<@527915961118883872>) wants to say: **${greatReply}** to you, <@${message.author.id}>.
-        `})
       } 
 
       if(filteredMessage.length > 0){
@@ -111,10 +101,10 @@ export class Bot {
           }
 
           const result = await retrieveCount(message.author.id);
-          if(result.count > 0){
+          if(result.count > 0 ){
               const embed = await checkMilestone(message.author.id, username, result.count);
   
-              if (embed) {
+              if (embed && message.channelId === racismchannelId) {
                  await message.channel.send({ embeds: [embed] })
               }
           }
